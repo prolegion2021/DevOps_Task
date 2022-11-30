@@ -1,6 +1,4 @@
-# **EPAM University Program**
-
-# [TASK 2. Database. MySQL ](README.md)
+# [TASK 2. Databases. MySQL. MongoDB]
 ### 1. Download MySQL server for your OS on VM.
 ```
 docker run --name=mysql1 --restart on-failure -d mysql/mysql-server:8.0
