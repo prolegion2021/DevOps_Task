@@ -219,6 +219,103 @@ Query OK, 0 rows affected, 1 warning (0.01 sec)
 ```
 ### 8. Create a database of new users with different privileges. Connect to the database as a new user and verify that the privileges allow or deny certain actions.
 ```
+mysql> create user 'epam_user_1'@'localhost' identified by '1234556';
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> grant select on STUDENTS.Students to 'epam_user_1'@'localhost';
+Query OK, 0 rows affected, 1 warning (0.01 sec)
+
+root@prolegion-work: docker exec -it mysql1 mysql -uepam_user_1 -p
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 502
+Server version: 8.0.31 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2022, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> use STUDENTS;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+
+mysql> show tables;
++--------------------+
+| Tables_in_STUDENTS |
++--------------------+
+| Students           |
++--------------------+
+1 row in set (0.01 sec)
+
+mysql> insert into Students (FirstName, SecondName, Description, Dateofbirthday, Course) values ('John', 'Doe', 'Best student', '2000-02-12', 2);
+ERROR 1142 (42000): INSERT command denied to user 'epam_user_1'@'localhost' for table 'Students'
+mysql> create table NEW;
+ERROR 1142 (42000): CREATE command denied to user 'epam_user_1'@'localhost' for table 'NEW'
+mysql> select * from Students where Firstname like 'Anton';
++----+-----------+------------+---------------------------+----------------+--------+------+
+| id | FirstName | Secondname | Description               | Dateofbirthday | Course | sex  |
++----+-----------+------------+---------------------------+----------------+--------+------+
+|  1 | Anton     | Antonov    | Nice communication skills | 2000-05-05     |      1 | NULL |
++----+-----------+------------+---------------------------+----------------+--------+------+
+1 row in set (0.00 sec)
 
 ```
 ### 9. Make a selection from the main table DB MySQL.
+```
+mysql> use mysql;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> show tables;
++------------------------------------------------------+
+| Tables_in_mysql                                      |
++------------------------------------------------------+
+| columns_priv                                         |
+| component                                            |
+| db                                                   |
+| default_roles                                        |
+| engine_cost                                          |
+| func                                                 |
+| general_log                                          |
+| global_grants                                        |
+| gtid_executed                                        |
+| help_category                                        |
+| help_keyword                                         |
+| help_relation                                        |
+| help_topic                                           |
+| innodb_index_stats                                   |
+| innodb_table_stats                                   |
+| ndb_binlog_index                                     |
+| password_history                                     |
+| plugin                                               |
+| procs_priv                                           |
+| proxies_priv                                         |
+| replication_asynchronous_connection_failover         |
+| replication_asynchronous_connection_failover_managed |
+| replication_group_configuration_version              |
+| replication_group_member_actions                     |
+| role_edges                                           |
+| server_cost                                          |
+| servers                                              |
+| slave_master_info                                    |
+| slave_relay_log_info                                 |
+| slave_worker_info                                    |
+| slow_log                                             |
+| tables_priv                                          |
+| time_zone                                            |
+| time_zone_leap_second                                |
+| time_zone_name                                       |
+| time_zone_transition                                 |
+| time_zone_transition_type                            |
+| user                                                 |
++------------------------------------------------------+
+38 rows in set (0.00 sec)
+
+```
