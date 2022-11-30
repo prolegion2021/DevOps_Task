@@ -367,7 +367,146 @@ mysql> show tables;
 3 rows in set (0.00 sec)
 ```
 ### 13.Transfer your local database to RDS AWS.
-![1](screenshots/1.png)
 ### 14.Connect to your database.
+![1](screenshots/1.png)
+
+```
+bash-4.4# mysql --host taskdb.cyd3a12sc4on.eu-central-1.rds.amazonaws.com -uroot -p
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 21
+Server version: 8.0.28 Source distribution
+
+Copyright (c) 2000, 2022, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+4 rows in set (0.09 sec)
+
+mysql> CREATE DATABASE STUDENTS;
+Query OK, 1 row affected (0.06 sec)
+
+mysql> exit
+Bye
+bash-4.4# mysql --host taskdb.cyd3a12sc4on.eu-central-1.rds.amazonaws.com -uroot -p STUDENTS < /tmp/backup.sql
+Enter password:
+bash-4.4# mysql --host taskdb.cyd3a12sc4on.eu-central-1.rds.amazonaws.com -uroot -p
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 23
+Server version: 8.0.28 Source distribution
+
+Copyright (c) 2000, 2022, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| STUDENTS           |
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+5 rows in set (0.12 sec)
+```
 ### 15.Execute SELECT operator similar step 6.
+```
+mysql> use STUDENTS;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> select * from Students;
++----+-----------+------------+---------------------------+----------------+--------+------+
+| id | FirstName | Secondname | Description               | Dateofbirthday | Course | sex  |
++----+-----------+------------+---------------------------+----------------+--------+------+
+|  1 | Anton     | Antonov    | Nice communication skills | 2000-05-05     |      1 | NULL |
+|  2 | Ivan      | Ivanov     | NULL                      | 1997-05-11     |      1 | NULL |
++----+-----------+------------+---------------------------+----------------+--------+------+
+2 rows in set (0.20 sec)
+
+```
 ### 16.Create the dump of your database.
+```
+bash-4.4# mysqldump --host taskdb.cyd3a12sc4on.eu-central-1.rds.amazonaws.com -uroot -p STUDENTS > awsbackup.sql
+Enter password:
+Warning: A partial dump from a server that has GTIDs will by default include the GTIDs of all transactions, even those that changed suppressed parts of the database. If you don't want to restore GTIDs, pass --set-gtid-purged=OFF. To make a complete dump, pass --all-databases --triggers --routines --events.
+bash-4.4# ls
+awsbackup.sql  boot  docker-entrypoint-initdb.d  etc             home  lib64  mnt  proc  run   srv  tmp  var
+bin            dev   entrypoint.sh               healthcheck.sh  lib   media  opt  root  sbin  sys  usr
+
+```
+# PART 3 – MongoDB
+
+### 17. Create a database. Use the use command to connect to a new database (If it doesn't exist, Mongo will create it when you write to it).
+```
+docker exec -it some-mongo mongosh
+
+```
+### 18. Create a collection. Use db.createCollection to create a collection. I'll leave the subject up to you. Run show dbs and show collections to view your database and collections.
+```
+test> db.createCollection('MyCollection');
+{ ok: 1 }
+test> show dbs;
+admin   40.00 KiB
+config  12.00 KiB
+local   40.00 KiB
+test     8.00 KiB
+test> show collections;
+MyCollection
+test>
+
+```
+### 19. Create some documents. Insert a couple of documents into your collection. I'll leave the subject matter up to you, perhaps cars or hats.
+```
+test> db.MyCollection.insertOne({type:'plastic', name:'car',price:'10$'});
+{
+  acknowledged: true,
+  insertedId: ObjectId("638787dc012c0fa95aede252")
+}
+test> db.MyCollection.insertOne({type:'plastic', name:'mouse',price:'10$'});
+{
+  acknowledged: true,
+  insertedId: ObjectId("63878851012c0fa95aede253")
+}
+test> db.MyCollection.insertOne({type:'metal', name:'hand',price:'10$'});
+{
+  acknowledged: true,
+  insertedId: ObjectId("63878868012c0fa95aede254")
+}
+```
+### 20. Use find() to list documents out.
+```
+test> db.MyCollection.find({name:'c
+test> show collections;
+MyCollection
+test> db.MyCollection.find({name:'hand'});
+[
+  {
+    _id: ObjectId("63878868012c0fa95aede254"),
+    type: 'metal',
+    name: 'hand',
+    price: '10$'
+  }
+]
+```
