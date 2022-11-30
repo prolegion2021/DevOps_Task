@@ -5,7 +5,7 @@
 ### 3. The --target key displays a list of open system TCP ports.
 ### The code that performs the functionality of each of the subtasks must be placed in a separate function
 
-![1](1_Linux_Bash/screenshots/1.png)
+![1](screenshots/1.png)
 ```Bash
 #!/bin/bash
 function all {  
@@ -49,7 +49,7 @@ esac
 ### 5. What time did site get the most requests?
 ### 6. What search bots have accessed the site? (UA + IP)
 
-![2](1_Linux_Bash/screenshots/2.png)
+![2](screenshots/2.png)
 ```Bash
 #!/bin/bash
 echo From which ip were the most requests?
@@ -78,8 +78,8 @@ cat apache_logs.txt | egrep bingbot | awk '{print $1}' | sort | uniq -d
 # 2. The path to the directory where the copies of the files will be stored.
 # In case of adding new or deleting old files, the script must add a corresponding entry to the log file indicating the time, type of operation and file name. [The command to run the script must be added to crontab with a run frequency of one minute]
 
-![3](1_Linux_Bash/screenshots/3_1.png)
-![4](1_Linux_Bash/screenshots/3_2.png)
+![3](screenshots/3_1.png)
+![4](screenshots/3_2.png)
 ```Bash
 #!/bin/bash
 
