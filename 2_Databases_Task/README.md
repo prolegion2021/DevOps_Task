@@ -1,6 +1,6 @@
 # **EPAM University Program**
 
-* # [TASK 2. Database. MySQL ](README.md)
+# [TASK 2. Database. MySQL ](README.md)
 ### 1. Download MySQL server for your OS on VM.
 ```
 docker run --name=mysql1 --restart on-failure -d mysql/mysql-server:8.0
@@ -319,3 +319,55 @@ mysql> show tables;
 38 rows in set (0.00 sec)
 
 ```
+# TASK PART 2
+### 10.Make backup of your database.
+```
+root@prolegion-work:/home/prolegion/DevOps_Task# docker exec -it mysql1 bash
+bash-4.4# mysqldump -u root -p STUDENTS > /tmp/backup.sql
+Enter password:
+bash-4.4# ls -la /tmp/backup.sql
+-rw-r--r-- 1 root root 3766 Nov 30 15:17 /tmp/backup.sql
+bash-4.4#
+
+```
+### 11.Delete the table and/or part of the data in the table.
+```
+mysql> use STUDENTS;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> drop table Students;
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> show tables;
++--------------------+
+| Tables_in_STUDENTS |
++--------------------+
+| Course             |
+| Tasks              |
++--------------------+
+2 rows in set (0.00 sec)
+
+```
+### 12.Restore your database.
+```
+mysql> source /tmp/backup.sql
+...
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> show tables;
++--------------------+
+| Tables_in_STUDENTS |
++--------------------+
+| Course             |
+| Students           |
+| Tasks              |
++--------------------+
+3 rows in set (0.00 sec)
+```
+### 13.Transfer your local database to RDS AWS.
+![1](screenshots/1.png)
+### 14.Connect to your database.
+### 15.Execute SELECT operator similar step 6.
+### 16.Create the dump of your database.
