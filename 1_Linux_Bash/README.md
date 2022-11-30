@@ -114,7 +114,7 @@ Usage: backup [SOURCE DIRECTORY] [DESTINATION DIRECTORY]
         Full path to the directory backup of which will be created.
     DESTINATION DIRECTIORY - ex.: /backup/
         Full path to the directory to which backup will be saved of SOURCE DIRECTORY.
-        If DESTINATION DIRECTORY doesn't exist, script will create this onу automatically.
+        If DESTINATION DIRECTORY doesn't exist, script will create this one automatically.
 EOF
 }
 
