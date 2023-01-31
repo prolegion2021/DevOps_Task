@@ -1,0 +1,14 @@
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+    hostname alpine38.localdomain
+
+auto eth1
+iface eth1 inet dhcp
+    hostname cl2
+auto eth2
+iface eth2 inet static
+    address 172.16.17.2
+    netmask 255.255.255.0

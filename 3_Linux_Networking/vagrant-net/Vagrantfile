@@ -1,0 +1,60 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+Vagrant.configure("2") do |config|
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "128"
+  end
+
+  config.ssh.insert_key = false
+  
+  config.vm.define "server", primary: true do |server|
+    server.vm.hostname = "server"
+    server.vm.box = "generic/alpine38"
+    server.vm.network "private_network", ip: "192.168.10.1"
+    server.vm.network "private_network", ip: "10.5.92.1"
+    server.vm.network "public_network"  
+    server.vm.provision "file", source: "dhcpd.conf", destination: "/tmp/"
+    server.vm.provision "shell", inline: <<-SHELL
+     echo "update apk"
+     sudo apk update
+     echo "install dhcp server"
+     sudo apk add dhcp
+     sudo cp /tmp/dhcpd.conf /etc/dhcp/
+     sudo rc-update add dhcpd
+     sudo rc-service dhcpd start
+    SHELL
+  end
+  
+  config.vm.define "client1" do |client1|
+    client1.vm.hostname = "client1"
+    client1.vm.box = "generic/alpine38"
+    client1.vm.network "private_network", ip: "10.5.92.2", auto_config: false
+     use_dhcp_assigned_default_route = false
+    client1.vm.network "private_network", ip: "172.16.17.1"
+    client1.vm.provision "shell", inline: <<-SHELL
+     echo "auto eth1" >> /etc/network/interfaces
+     echo "iface eth1 inet dhcp" >> /etc/network/interfaces
+     echo "hostname client1" >> /etc/network/interfaces
+     sudo ip link set dev eth1 up
+     sudo route add 10.5.92.1 dev eth1
+     sudo udhcpc -i eth1 -r 10.5.92.1
+    SHELL
+  end
+
+  config.vm.define "client2" do |client2|
+    client2.vm.hostname = "client2"
+    client2.vm.box = "generic/alpine38"
+    client2.vm.network "private_network", ip: "192.168.10.2", auto_config: false
+     use_dhcp_assigned_default_route = false
+    client2.vm.network "private_network", ip: "172.16.17.2"
+    client2.vm.provision "shell", inline: <<-SHELL
+     echo "auto eth1" >> /etc/network/interfaces
+     echo "iface eth1 inet dhcp" >> /etc/network/interfaces
+     echo "hostname client2" >> /etc/network/interfaces
+     sudo ip link set dev eth1 up
+     sudo route add 192.168.10.1 dev eth1
+     sudo udhcpc -i eth1 -r 192.168.10.1
+    SHELL
+  end
+end
+

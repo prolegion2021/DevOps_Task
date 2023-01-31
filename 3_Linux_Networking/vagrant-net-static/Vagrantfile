@@ -1,0 +1,31 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "128"
+  end
+
+  config.vm.define "server", primary: true do |server|
+    server.vm.hostname = "server"
+    server.vm.box = "generic/alpine38"
+    server.vm.network "private_network", ip: "10.92.17.1"
+    server.vm.network "private_network", ip: "10.5.92.1"
+    server.vm.network "public_network"  
+  end
+  
+  config.vm.define "client1" do |client1|
+    client1.vm.hostname = "client1"
+    client1.vm.box = "generic/alpine38"
+    client1.vm.network "private_network", ip: "10.92.17.2"
+    client1.vm.network "private_network", ip: "172.16.17.1"
+  end
+
+  config.vm.define "client2" do |client2|
+    client2.vm.hostname = "client2"
+    client2.vm.box = "generic/alpine38"
+    client2.vm.network "private_network", ip: "10.5.92.2"
+    client2.vm.network "private_network", ip: "172.16.17.2"
+  end
+end
+

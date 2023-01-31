@@ -1,0 +1,121 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+Vagrant.configure("2") do |config|
+  
+  config.vm.define "server", primary: true do |server|
+	  server.vm.provider "virtualbox" do |vb|
+            vb.customize ["modifyvm", :id, "--nic3", "intnet"]
+            vb.customize ["modifyvm", :id, "--intnet1", "intnet1"] #eth2 2.2.2.0 
+            vb.customize ["modifyvm", :id, "--nic4", "intnet"]
+            vb.customize ["modifyvm", :id, "--intnet2", "intnet2"] #eth3 1.1.1.0
+	    vb.memory = "256"
+            use_dhcp_assigned_default_route = false
+	  end
+
+    server.ssh.insert_key = false
+
+    server.vm.hostname = "server"
+    server.vm.box = "generic/alpine38"
+    server.vm.network "public_network", auto_config: false #eth1
+    # manual ip
+    server.vm.provision "shell",
+    run: "always",
+    inline: "sudo ifconfig eth1 192.168.1.19 netmask 255.255.255.0 up"
+
+    server.vm.provision "file", source: "dhcpd.conf", destination: "/tmp/"
+    server.vm.provision "file", source: "sshd_config", destination: "/tmp/"
+    server.vm.provision "shell", inline: <<-SHELL
+      sudo ip addr add 2.2.2.1/24 dev eth2
+      sudo ip link set eth2 up
+      sudo ip addr add 1.1.1.1/24 dev eth3
+      sudo ip link set eth3 up
+      sudo mv -f /tmp/sshd_config /etc/ssh/sshd_config
+      sudo rc-service sshd restart
+#     sudo rc-service networking restart
+      sudo ip route del default via 10.0.2.2 || true
+      sudo ip route add default via 192.168.1.1
+       echo "update apk"
+       sudo apk update
+       echo "install dhcp server"
+       sudo apk add dhcp
+       sudo cp /tmp/dhcpd.conf /etc/dhcp/
+       sudo rc-update add dhcpd
+       sudo rc-service dhcpd start
+       ### forwarding
+       sudo sysctl -w net.ipv4.ip_forward=1
+       ### iptables
+       sudo apk add iptables
+       sudo iptables -P FORWARD ACCEPT
+       sudo iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
+       sudo /etc/init.d/iptables save
+#      sudo /etc/init.d/iptables restart
+     SHELL
+  end
+ 
+  # client 1 
+  # 
+  config.vm.define "cl1" do |cl1|
+     cl1.vm.provider "virtualbox" do |vb|
+       vb.customize ["modifyvm", :id, "--nic3", "intnet"] #eth1
+       vb.customize ["modifyvm", :id, "--intnet1", "intnet1"] 
+       vb.customize ["modifyvm", :id, "--nic4", "intnet"]
+       vb.customize ["modifyvm", :id, "--intnet4", "intnet4"] # eth2 intnet4 172.16.17.0
+       vb.memory = "256"
+       use_dhcp_assigned_default_route = false
+     end
+    cl1.ssh.insert_key = false
+
+    cl1.vm.hostname = "cl1"
+    cl1.vm.box = "generic/alpine38"
+    cl1.vm.provision "file", source: "interface_cl1", destination: "/tmp/"
+#   cl1.vm.provision "shell", inline: "sudo ip route del default via 10.0.2.0 || true"
+    cl1.vm.provision "shell", inline: <<-SHELL
+#     sudo ip link set eth1 up
+#     sudo ip link set eth2 up
+      sudo cp /tmp/interface_cl1 /etc/network/interfaces
+      #apply changes in conf file
+      sudo rc-service networking restart
+#     sudo route add 192.168.1.19 dev eth1
+#     sudo route add 192.168.1.19 dev eth2
+      sudo ip route del default via 10.0.2.2 || true
+      sudo ip route add 192.168.1.19 dev eth1
+      # add next hop
+      sudo route add -net 192.168.1.0 netmask 255.255.255.0 gw 192.168.1.19
+      sudo route add default gw 192.168.1.19
+
+     SHELL
+  end
+  
+  # client2 
+  # 
+  config.vm.define "cl2" do |cl2|
+     cl2.vm.provider "virtualbox" do |vb|
+       vb.customize ["modifyvm", :id, "--nic3", "intnet"]
+       vb.customize ["modifyvm", :id, "--intnet2", "intnet2"]
+       vb.customize ["modifyvm", :id, "--nic4", "intnet"]
+       vb.customize ["modifyvm", :id, "--intnet4", "intnet4"] # intnet3 172.16.17.0
+       vb.memory = "256"
+       use_dhcp_assigned_default_route = false
+     end
+    cl2.ssh.insert_key = false
+
+    cl2.vm.hostname = "cl2"
+    cl2.vm.box = "generic/alpine38"
+    cl2.vm.provision "file", source: "interface_cl2", destination: "/tmp/"
+#   cl2.vm.provision "shell", inline: "sudo ip route del default via 10.0.2.0 || true"
+    cl2.vm.provision "shell", inline: <<-SHELL
+#     sudo ip link set eth1 up
+#     sudo ip link set eth2 up
+      sudo cp /tmp/interface_cl2 /etc/network/interfaces
+      #apply changes in conf file
+      sudo rc-service networking restart
+#     sudo route add 192.168.1.19 dev eth1
+#     sudo route add 192.168.1.19 dev eth2
+      sudo ip route del default via 10.0.2.2 || true
+      sudo ip route add 192.168.1.19 dev eth1
+      # add next hop
+      sudo route add -net 192.168.1.0 netmask 255.255.255.0 gw 192.168.1.19
+      sudo route add default gw 192.168.1.19
+     SHELL
+  end
+end

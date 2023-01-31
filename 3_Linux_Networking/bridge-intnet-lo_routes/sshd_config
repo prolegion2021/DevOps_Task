@@ -1,0 +1,8 @@
+AuthorizedKeysFile      .ssh/authorized_keys
+
+Subsystem       sftp    /usr/lib/ssh/sftp-server
+# change to yes in yout want to stay with password login
+PasswordAuthentication no
+PermitRootLogin yes
+
+UseDNS no
